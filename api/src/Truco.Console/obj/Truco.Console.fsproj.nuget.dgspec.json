@@ -1,0 +1,114 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/cassio/git/truco/api/src/Truco.Console/Truco.Console.fsproj": {}
+  },
+  "projects": {
+    "/home/cassio/git/truco/api/src/Truco.Console/Truco.Console.fsproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/cassio/git/truco/api/src/Truco.Console/Truco.Console.fsproj",
+        "projectName": "Truco.Console",
+        "projectPath": "/home/cassio/git/truco/api/src/Truco.Console/Truco.Console.fsproj",
+        "packagesPath": "/home/cassio/.nuget/packages/",
+        "outputPath": "/home/cassio/git/truco/api/src/Truco.Console/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/usr/share/dotnet/sdk/NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/home/cassio/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp2.2"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp2.2": {
+            "projectReferences": {
+              "/home/cassio/git/truco/api/src/Truco.Core/Truco.Core.fsproj": {
+                "projectPath": "/home/cassio/git/truco/api/src/Truco.Core/Truco.Core.fsproj"
+              }
+            }
+          }
+        }
+      },
+      "frameworks": {
+        "netcoreapp2.2": {
+          "dependencies": {
+            "FSharp.Core": {
+              "target": "Package",
+              "version": "[4.6.2, )"
+            },
+            "Microsoft.NETCore.App": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.2.0, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    },
+    "/home/cassio/git/truco/api/src/Truco.Core/Truco.Core.fsproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/cassio/git/truco/api/src/Truco.Core/Truco.Core.fsproj",
+        "projectName": "Truco.Core",
+        "projectPath": "/home/cassio/git/truco/api/src/Truco.Core/Truco.Core.fsproj",
+        "packagesPath": "/home/cassio/.nuget/packages/",
+        "outputPath": "/home/cassio/git/truco/api/src/Truco.Core/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/usr/share/dotnet/sdk/NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/home/cassio/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "dependencies": {
+            "FSharp.Core": {
+              "target": "Package",
+              "version": "[4.6.2, )"
+            },
+            "MoreLinq": {
+              "target": "Package",
+              "version": "[3.1.1, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            }
+          },
+          "imports": [
+            "net461"
+          ],
+          "assetTargetFallback": true,
+          "warn": true
+        }
+      }
+    }
+  }
+}

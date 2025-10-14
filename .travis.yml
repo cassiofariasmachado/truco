@@ -1,9 +1,0 @@
-language: csharp
-dist: xenial 
-mono: none
-dotnet: 3.0
-solution: api/Truco.sln
-script:
-  - cd api
-  - dotnet build
-  - dotnet test

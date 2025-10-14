@@ -21,7 +21,7 @@ module ModelsTest =
     let ``Should create a hand with an empty list``() =
         let hand = createHand []
 
-        hand |> should equal []
+        hand |> should equivalent []
 
     [<Fact>]
     let ``Should create a player correctly``() =

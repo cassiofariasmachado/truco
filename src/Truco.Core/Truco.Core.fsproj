@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Models.fs" />
+    <Compile Include="Actions.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MoreLinq" Version="4.4.0" />
+  </ItemGroup>
+
+</Project>

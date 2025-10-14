@@ -1,5 +1,6 @@
 namespace Truco.Core
 
+open System
 open Truco.Core.Models
 open MoreLinq
 
@@ -18,7 +19,7 @@ module Actions =
         | 11 -> false
         | _ -> true
 
-    let shuffleDeck: Deck = MoreEnumerable.RandomSubset(cardValues.Keys, cardValues.Keys.Count) |> List.ofSeq
+    let shuffleDeck(): Deck = MoreEnumerable.RandomSubset(cardValues.Keys, cardValues.Keys.Count) |> List.ofSeq
 
     let checkTurnWinner (playerOne: Player, cardOne) (playerTwo: Player, cardTwo) =
         match (cardValue cardOne, cardValue cardTwo) with
@@ -50,12 +51,6 @@ module Actions =
 
         let updatedMatchWithTurn = addTurnToRoundHistory _match turn
 
-        match winner with
-        | Some winner when winner = playerOne -> printf "PlayerOne winner!"
-        | Some winner when winner = playerTwo -> printf "PlayerTwo winner!"
-        | _ -> printf "Draw"
-
         { updatedMatchWithTurn with
-              PlayerOne = { updatedMatchWithTurn.PlayerOne with Player = playerOne }
-              PlayerTwo = { updatedMatchWithTurn.PlayerTwo with Player = playerTwo } }
- 
+              PlayerOne.Player = playerOne
+              PlayerTwo.Player = playerTwo }

@@ -63,6 +63,10 @@ module Models =
     type Round =
         { TurnHistory: Turn list
           Winner: RoundWinner option }
+        
+    let createRound =
+        { TurnHistory = []
+          Winner = None }
 
     type MatchPlayer =
         { Player: Player

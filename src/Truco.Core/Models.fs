@@ -26,25 +26,17 @@ module Models =
 
     type Hand = Card list
 
-    let createHand (cards: Card list): Hand = cards
+    let createHand (cards: Card list) : Hand = cards
 
-    type Player =
-        { Name: string
-          Hand: Hand }
+    type Player = { Name: string; Hand: Hand }
 
-    let createPlayer name hand =
-        { Name = name
-          Hand = hand }
+    let createPlayer name hand = { Name = name; Hand = hand }
 
     type Deck = Card list
 
-    type PlayersMove =
-        { Player: Player
-          PlayedCard: Card }
+    type PlayersMove = { Player: Player; PlayedCard: Card }
 
-    let createPlayerMove player card =
-        { Player = player
-          PlayedCard = card }
+    let createPlayerMove player card = { Player = player; PlayedCard = card }
 
     type TurnWinner = Player option
 
@@ -63,18 +55,12 @@ module Models =
     type Round =
         { TurnHistory: Turn list
           Winner: RoundWinner option }
-        
-    let createRound =
-        { TurnHistory = []
-          Winner = None }
 
-    type MatchPlayer =
-        { Player: Player
-          Points: int }
+    let createRound = { TurnHistory = []; Winner = None }
 
-    let createMatchPlayer player =
-        { Player = player
-          Points = 0 }
+    type MatchPlayer = { Player: Player; Points: int }
+
+    let createMatchPlayer player = { Player = player; Points = 0 }
 
     type MatchWinner = MatchWinner of Player
 
@@ -141,5 +127,4 @@ module Models =
               (Four, Sword), 1
               (Four, Club), 1
               (Four, Gold), 1
-              (Four, Cup), 1 
-            ]
+              (Four, Cup), 1 ]

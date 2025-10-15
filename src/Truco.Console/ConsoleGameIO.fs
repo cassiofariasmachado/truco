@@ -8,7 +8,7 @@ module ConsoleGameIO =
 
     type ConsoleGameIO() =
         interface IGameIO with
-            member _.ShowMessage(msg: string) = printfn "%s" msg
+            member _.ShowMessage(msg: string) = printfn $"{msg}"
 
             member _.ShowHand(player: Player) =
                 printfn ""
@@ -40,7 +40,7 @@ module ConsoleGameIO =
             member _.ShowTurnResult(turn: Turn) =
                 let (rankOne, suitOne) = turn.PlayersMoveOne.PlayedCard
                 let (rankTwo, suitTwo) = turn.PlayersMoveTwo.PlayedCard
-                
+
                 printfn ""
                 printfn "--- Turn Result ---"
                 printfn $"{turn.PlayersMoveOne.Player.Name} played: {rankOne} of {suitOne}"
@@ -74,9 +74,11 @@ module ConsoleGameIO =
                 printfn "╚══════════════════════════════════╝"
 
                 match _match.Winner with
-                | Some(MatchWinner winner) -> printfn "\n🏆 Winner: %s 🏆" winner.Name
+                | Some(MatchWinner winner) ->
+                    printfn ""
+                    printfn $"🏆 Winner: {winner.Name} 🏆"
                 | None -> printfn "\nMatch ended in a draw"
-                
+
                 printfn ""
                 printfn "Final Score:"
                 printfn $"  {_match.PlayerOne.Player.Name}: {_match.PlayerOne.Points} points"

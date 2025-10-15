@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="Models.fs" />
-    <Compile Include="GameIO.fs" />
-    <Compile Include="Actions.fs" />
-    <Compile Include="GameLoop.fs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Models.fs"/>
+        <Compile Include="GameIO.fs"/>
+        <Compile Include="Actions.fs"/>
+        <Compile Include="GameLoop.fs"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MoreLinq" Version="4.4.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MoreLinq" Version="4.4.0"/>
+    </ItemGroup>
 
 </Project>

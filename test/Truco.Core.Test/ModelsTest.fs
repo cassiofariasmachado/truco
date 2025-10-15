@@ -7,24 +7,21 @@ open Truco.Core.Models
 module ModelsTest =
 
     [<Fact>]
-    let ``Should create a hand correctly``() =
-        let cards =
-            [ (Ace, Sword)
-              (Ace, Club)
-              (Two, Cup) ]
+    let ``Should create a hand correctly`` () =
+        let cards = [ (Ace, Sword); (Ace, Club); (Two, Cup) ]
 
         let hand = createHand cards
 
         hand |> should equal (cards)
 
     [<Fact>]
-    let ``Should create a hand with an empty list``() =
+    let ``Should create a hand with an empty list`` () =
         let hand = createHand []
 
         hand |> should equivalent []
 
     [<Fact>]
-    let ``Should create a player correctly``() =
+    let ``Should create a player correctly`` () =
         let name = "John"
         let hand = createHand [ (Ace, Sword) ]
 
@@ -34,7 +31,7 @@ module ModelsTest =
         player.Hand |> should equal hand
 
     [<Fact>]
-    let ``Should create a player move correctly``() =
+    let ``Should create a player move correctly`` () =
         let player = createPlayer "John" []
         let card = (Ace, Sword)
 
@@ -44,7 +41,7 @@ module ModelsTest =
         playerMove.PlayedCard |> should equal card
 
     [<Fact>]
-    let ``Should create a turn correctly``() =
+    let ``Should create a turn correctly`` () =
         let playerOne = createPlayer "John" []
         let cardPlayerOne = (Two, Cup)
         let playerTwo = createPlayer "Mary" []
@@ -59,7 +56,7 @@ module ModelsTest =
         turn.PlayersMoveTwo |> should equal playerTwoMove
 
     [<Fact>]
-    let ``Should create a match player correctly``() =
+    let ``Should create a match player correctly`` () =
         let player = createPlayer "John" [ (Ace, Sword) ]
         let matchPlayer = createMatchPlayer player
 
@@ -67,7 +64,7 @@ module ModelsTest =
         matchPlayer.Points |> should equal 0
 
     [<Fact>]
-    let ``Should create a match correctly``() =
+    let ``Should create a match correctly`` () =
         let playerOne = createPlayer "John" [ (Ace, Sword) ]
         let playerTwo = createPlayer "Mary" [ (Ace, Cup) ]
 

@@ -12,7 +12,8 @@ let main _ =
     printfn "╚══════════════════════════════════╝"
     printfn ""
 
-    let io = ConsoleGameIO() :> IGameIO
+    // Create console IO using functional GameIO record pattern
+    let io = create()
 
     printfn "Enter Player One's name:"
 
@@ -36,10 +37,11 @@ let main _ =
     let playerOne = createPlayer playerOneName []
     let playerTwo = createPlayer playerTwoName []
 
+    let rng = Random()
     let initialMatch = createMatch playerOne playerTwo
-    let finalMatch = playMatch io initialMatch 12
+    let finalMatch = playMatch io rng initialMatch 12
 
-    io.ShowMatchResult(finalMatch)
+    io.ShowMatchResult finalMatch
 
     printfn "\nPress any key to exit..."
     Console.ReadKey() |> ignore

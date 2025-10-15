@@ -1,10 +1,17 @@
 namespace Truco.Core
 
+open System
 open Truco.Core.Models
 open Truco.Core.Actions
 open Truco.Core.GameIO
 
 module GameLoop =
+
+    /// <summary>
+    ///   Helper to compare players structurally
+    /// </summary>
+    let private playersEqual (p1: Player) (p2: Player) =
+        p1.Name = p2.Name
 
     /// <summary>
     ///   Determine if a player has won the round.
@@ -15,26 +22,25 @@ module GameLoop =
     let determineRoundWinner (round: Round) : RoundWinner option =
         match round.TurnHistory with
         | [] -> None
-        | turns ->
+        | firstTurn :: _ as turns ->
             let turnWinners = turns |> List.rev |> List.choose (fun turn -> turn.Winner)
 
             match turnWinners with
             | [] -> None
             | _ ->
-                let firstTurn = turns.Head
-                let playerOneName = firstTurn.PlayersMoveOne.Player.Name
-                let playerTwoName = firstTurn.PlayersMoveTwo.Player.Name
+                let playerOne = firstTurn.PlayersMoveOne.Player
+                let playerTwo = firstTurn.PlayersMoveTwo.Player
 
                 let playerOneWins =
-                    turnWinners |> List.filter (fun p -> p.Name = playerOneName) |> List.length
+                    turnWinners |> List.filter (playersEqual playerOne) |> List.length
 
                 let playerTwoWins =
-                    turnWinners |> List.filter (fun p -> p.Name = playerTwoName) |> List.length
+                    turnWinners |> List.filter (playersEqual playerTwo) |> List.length
 
                 if playerOneWins >= 2 then
-                    Some(RoundWinner firstTurn.PlayersMoveOne.Player)
+                    Some(RoundWinner playerOne)
                 elif playerTwoWins >= 2 then
-                    Some(RoundWinner firstTurn.PlayersMoveTwo.Player)
+                    Some(RoundWinner playerTwo)
                 else
                     None
 
@@ -44,7 +50,7 @@ module GameLoop =
     let awardRoundPoints (_match: Match) (roundWinner: RoundWinner) : Match =
         let (RoundWinner winner) = roundWinner
 
-        if winner.Name = _match.PlayerOne.Player.Name then
+        if playersEqual winner _match.PlayerOne.Player then
             { _match with
                 PlayerOne = addPoint _match.PlayerOne }
         else
@@ -54,23 +60,28 @@ module GameLoop =
     /// <summary>
     /// Deal new hands to both players
     /// </summary>
-    let dealNewHands (_match: Match) : Match =
-        let deck = shuffleDeck ()
+    let dealNewHands (rng: Random) (_match: Match) : Match =
+        let deck = shuffleDeck rng
 
-        let handPlayerOne = [ deck[0]; deck[2]; deck[4] ]
-        let handPlayerTwo = [ deck[1]; deck[3]; deck[5] ]
+        match deck with
+        | c1 :: c2 :: c3 :: c4 :: c5 :: c6 :: _ ->
+            let handPlayerOne = [ c1; c3; c5 ]
+            let handPlayerTwo = [ c2; c4; c6 ]
 
-        let playerOne =
-            { _match.PlayerOne.Player with
-                Hand = handPlayerOne }
+            let playerOne =
+                { _match.PlayerOne.Player with
+                    Hand = handPlayerOne }
 
-        let playerTwo =
-            { _match.PlayerTwo.Player with
-                Hand = handPlayerTwo }
+            let playerTwo =
+                { _match.PlayerTwo.Player with
+                    Hand = handPlayerTwo }
 
-        { _match with
-            PlayerOne.Player = playerOne
-            PlayerTwo.Player = playerTwo }
+            { _match with
+                PlayerOne.Player = playerOne
+                PlayerTwo.Player = playerTwo }
+        | _ -> 
+            // This should never happen with a proper deck, but handle gracefully
+            _match
 
     /// <summary>
     ///   Check if a player has won the match (reached target score)
@@ -99,81 +110,85 @@ module GameLoop =
             match currentRound.TurnHistory with
             | [] -> _match.PlayerOne.Player
             | lastTurn :: _ ->
-                match lastTurn.Winner with
-                | Some winner -> winner
-                | None -> _match.PlayerOne.Player
+                lastTurn.Winner |> Option.defaultValue _match.PlayerOne.Player
 
     /// <summary>
     ///   Start a new round
     /// </summary>
-    let startNewRound (_match: Match) : Match =
+    let startNewRound (rng: Random) (_match: Match) : Match =
         let newRound = createRound
 
         let matchWithNewRound =
             { _match with
                 RoundHistory = newRound :: _match.RoundHistory }
 
-        dealNewHands matchWithNewRound
+        dealNewHands rng matchWithNewRound
 
     /// <summary>
-    ///   Get the player's card choice via IGameIO
+    ///   Get the player's card choice via GameIO
     /// </summary>
-    let getPlayerChoice (io: IGameIO) (player: Player) : Card =
-        io.ShowHand(player)
-        let cardIndex = io.GetCardChoice(player)
+    let getPlayerChoice (io: GameIO) (player: Player) : Card =
+        io.ShowHand player
+        let cardIndex = io.GetCardChoice player
         player.Hand[cardIndex]
 
     /// <summary>
     ///   Play a single round until a player wins or maximum turns are reached
     /// </summary>
-    let rec playRound (io: IGameIO) (_match: Match) : Match =
-        let currentRound = _match.RoundHistory.Head
+    let rec playRound (io: GameIO) (_match: Match) : Match =
+        match _match.RoundHistory with
+        | [] -> _match // No round to play
+        | currentRound :: rest ->
+            let roundWinner = determineRoundWinner currentRound
+            let getPlayerChoiceWithIO = getPlayerChoice io
 
-        let roundWinner = determineRoundWinner currentRound
-        let getPlayerChoiceWithIO = getPlayerChoice io
+            match roundWinner with
+            | Some winner ->
+                let updatedRound =
+                    { currentRound with
+                        Winner = Some winner }
 
-        match roundWinner with
-        | Some winner ->
-            let updatedRound =
-                { currentRound with
-                    Winner = Some winner }
+                let updatedMatch =
+                    { _match with
+                        RoundHistory = updatedRound :: rest }
 
-            let updatedMatch =
-                { _match with
-                    RoundHistory = updatedRound :: _match.RoundHistory.Tail }
+                let finalMatch = awardRoundPoints updatedMatch winner
 
-            let finalMatch = awardRoundPoints updatedMatch winner
+                io.ShowRoundResult updatedRound finalMatch.PlayerOne finalMatch.PlayerTwo
 
-            io.ShowRoundResult updatedRound finalMatch.PlayerOne finalMatch.PlayerTwo
+                io.ShowScore finalMatch.PlayerOne finalMatch.PlayerTwo
 
-            io.ShowScore finalMatch.PlayerOne finalMatch.PlayerTwo
+                finalMatch
+            | None when currentRound.TurnHistory.Length >= 3 ->
+                io.ShowRoundResult currentRound _match.PlayerOne _match.PlayerTwo
+                io.ShowScore _match.PlayerOne _match.PlayerTwo
 
-            finalMatch
-        | None when currentRound.TurnHistory.Length >= 3 ->
-            io.ShowRoundResult currentRound _match.PlayerOne _match.PlayerTwo
-            io.ShowScore _match.PlayerOne _match.PlayerTwo
+                _match
+            | None ->
+                let turnNumber = currentRound.TurnHistory.Length + 1
 
-            _match
-        | None ->
-            let turnNumber = currentRound.TurnHistory.Length + 1
+                io.ShowMessage $"\n========== TURN {turnNumber:d2} =========="
 
-            io.ShowMessage $"\n========== TURN {turnNumber:d2} =========="
+                let cardPlayerOne = getPlayerChoiceWithIO _match.PlayerOne.Player
+                let cardPlayerTwo = getPlayerChoiceWithIO _match.PlayerTwo.Player
 
-            let cardPlayerOne = getPlayerChoiceWithIO _match.PlayerOne.Player
-            let cardPlayerTwo = getPlayerChoiceWithIO _match.PlayerTwo.Player
+                let updatedMatch = playTurn _match cardPlayerOne cardPlayerTwo
 
-            let updatedMatch = playTurn _match cardPlayerOne cardPlayerTwo
-
-            let lastTurn = updatedMatch.RoundHistory.Head.TurnHistory.Head
-
-            io.ShowTurnResult(lastTurn)
-
-            playRound io updatedMatch
+                match updatedMatch.RoundHistory with
+                | currentRound :: _ ->
+                    match currentRound.TurnHistory with
+                    | lastTurn :: _ ->
+                        io.ShowTurnResult lastTurn
+                        playRound io updatedMatch
+                    | [] -> 
+                        playRound io updatedMatch
+                | [] -> 
+                    updatedMatch
 
     /// <summary>
     ///   Play the match until a player reaches the target score
     /// </summary>
-    let rec playMatch (io: IGameIO) (_match: Match) (targetScore: int) : Match =
+    let rec playMatch (io: GameIO) (rng: Random) (_match: Match) (targetScore: int) : Match =
         let matchWinner = checkMatchWinner _match targetScore
         let playRoundWithIO = playRound io
 
@@ -185,11 +200,11 @@ module GameLoop =
 
             let roundNumber = completedRounds + 1
 
-            io.ShowMessage("\n\n╔══════════════════════════════════╗")
-            io.ShowMessage($"║       ROUND {roundNumber:d2}                   ║")
-            io.ShowMessage("╚══════════════════════════════════╝")
+            io.ShowMessage "\n\n╔══════════════════════════════════╗"
+            io.ShowMessage $"║       ROUND {roundNumber:d2}                   ║"
+            io.ShowMessage "╚══════════════════════════════════╝"
 
-            let matchWithNewRound = startNewRound _match
+            let matchWithNewRound = startNewRound rng _match
             let matchAfterRound = playRoundWithIO matchWithNewRound
 
-            playMatch io matchAfterRound targetScore
+            playMatch io rng matchAfterRound targetScore

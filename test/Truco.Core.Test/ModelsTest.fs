@@ -7,23 +7,9 @@ open Truco.Core.Models
 module ModelsTest =
 
     [<Fact>]
-    let ``Should create a hand correctly`` () =
-        let cards = [ (Ace, Sword); (Ace, Club); (Two, Cup) ]
-
-        let hand = createHand cards
-
-        hand |> should equal (cards)
-
-    [<Fact>]
-    let ``Should create a hand with an empty list`` () =
-        let hand = createHand []
-
-        hand |> should equivalent []
-
-    [<Fact>]
     let ``Should create a player correctly`` () =
         let name = "John"
-        let hand = createHand [ (Ace, Sword) ]
+        let hand = [ (Ace, Sword) ]
 
         let player = createPlayer name hand
 
@@ -76,3 +62,20 @@ module ModelsTest =
         _match.PlayerTwo.Points |> should equal 0
         _match.RoundHistory |> should be Empty
         _match.Winner |> should equal None
+
+    [<Fact>]
+    let ``cardValues should be immutable Map`` () =
+        let aceOfSwords = (Ace, Sword)
+        let value = Map.find aceOfSwords cardValues
+        value |> should equal 14
+
+    [<Fact>]
+    let ``cardValues should contain all 40 cards`` () =
+        Map.count cardValues |> should equal 40
+
+    [<Fact>]
+    let ``semantic constants should match card values`` () =
+        highestCardValue |> should equal 14
+        secondHighestCardValue |> should equal 13
+        thirdHighestCardValue |> should equal 12
+        fourthHighestCardValue |> should equal 11

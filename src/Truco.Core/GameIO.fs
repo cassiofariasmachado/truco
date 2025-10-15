@@ -5,13 +5,16 @@ open Truco.Core.Models
 module GameIO =
 
     /// <summary>
-    ///   Abstract type for game I/O operations
+    ///   Record of functions for game I/O operations (more idiomatic F#)
     /// </summary>
-    type IGameIO =
-        abstract member ShowMessage: string -> unit
-        abstract member ShowHand: Player -> unit
-        abstract member GetCardChoice: Player -> int
-        abstract member ShowTurnResult: Turn -> unit
-        abstract member ShowRoundResult: Round -> MatchPlayer -> MatchPlayer -> unit
-        abstract member ShowMatchResult: Match -> unit
-        abstract member ShowScore: MatchPlayer -> MatchPlayer -> unit
+    type GameIO = {
+        ShowMessage: string -> unit
+        ShowHand: Player -> unit
+        GetCardChoice: Player -> int
+        ShowTurnResult: Turn -> unit
+        ShowRoundResult: Round -> MatchPlayer -> MatchPlayer -> unit
+        ShowMatchResult: Match -> unit
+        ShowScore: MatchPlayer -> MatchPlayer -> unit
+    }
+
+

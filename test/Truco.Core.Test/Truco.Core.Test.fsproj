@@ -11,6 +11,7 @@
         <Compile Include="ActionsTest.fs"/>
         <Compile Include="ModelsTest.fs"/>
         <Compile Include="GameLoopTest.fs"/>
+        <Compile Include="GameIOTest.fs"/>
         <Compile Include="Program.fs"/>
     </ItemGroup>
 

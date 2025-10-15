@@ -1,34 +1,46 @@
 namespace Truco.Core
 
+open System
 open Truco.Core.Models
-open MoreLinq
 
 module Actions =
 
     /// <summary>
-    ///   Gets the card value based
+    ///   Gets the card value based on the card
     /// </summary>
-    let cardValue card = cardValues.Item card
+    let cardValue card = 
+        Map.find card cardValues
 
     /// <summary>
-    ///   Determines if a card is black
+    ///   Determines if a card is black (lower value cards)
     /// </summary>
     let isBlackCard card =
         let value = cardValue card
-
-        match value with
-        | 14
-        | 13
-        | 12
-        | 11 -> false
-        | _ -> true
+        value < fourthHighestCardValue
 
     /// <summary>
-    ///   Shuffles the deck of cards
+    ///   Fisher-Yates shuffle algorithm
     /// </summary>
-    let shuffleDeck () : Deck =
-        MoreEnumerable.RandomSubset(cardValues.Keys, cardValues.Keys.Count)
-        |> List.ofSeq
+    let private shuffleArray (rng: Random) (array: 'a[]) =
+        let swap i j =
+            let temp = array.[i]
+            array.[i] <- array.[j]
+            array.[j] <- temp
+        
+        for i in (Array.length array - 1) .. -1 .. 1 do
+            let j = rng.Next(0, i + 1)
+            swap i j
+        array
+
+    /// <summary>
+    ///   Shuffles the deck of cards using Fisher-Yates algorithm
+    /// </summary>
+    let shuffleDeck (rng: Random) : Deck =
+        cardValues
+        |> Map.toArray
+        |> Array.map fst
+        |> shuffleArray rng
+        |> Array.toList
 
     /// <summary>
     ///   Checks which player won the turn
@@ -57,10 +69,12 @@ module Actions =
     ///   Adds a turn to the round history of a match
     /// </summary>
     let addTurnToRoundHistory _match turn =
-        let updatedLastRound = addTurnToTurnHistory _match.RoundHistory.Head turn
-
-        { _match with
-            RoundHistory = updatedLastRound :: _match.RoundHistory }
+        match _match.RoundHistory with
+        | [] -> _match // No round to add turn to
+        | lastRound :: rest ->
+            let updatedLastRound = addTurnToTurnHistory lastRound turn
+            { _match with
+                RoundHistory = updatedLastRound :: rest }
 
     /// <summary>
     ///   Adds a point to a match player

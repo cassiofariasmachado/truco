@@ -1,5 +1,6 @@
 namespace Truco.Core
 
+open System
 open Xunit
 open FsUnit
 open Truco.Core.Models
@@ -143,7 +144,8 @@ module GameLoopTest =
     [<Fact>]
     let ``dealNewHands should give each player 3 cards`` () =
         let _match = createTestMatch ()
-        let updatedMatch = dealNewHands _match
+        let rng = Random(42)
+        let updatedMatch = dealNewHands rng _match
 
         updatedMatch.PlayerOne.Player.Hand |> should haveLength 3
         updatedMatch.PlayerTwo.Player.Hand |> should haveLength 3
@@ -151,7 +153,8 @@ module GameLoopTest =
     [<Fact>]
     let ``dealNewHands should give different cards to each player`` () =
         let _match = createTestMatch ()
-        let updatedMatch = dealNewHands _match
+        let rng = Random(42)
+        let updatedMatch = dealNewHands rng _match
 
         let playerOneCards = updatedMatch.PlayerOne.Player.Hand
         let playerTwoCards = updatedMatch.PlayerTwo.Player.Hand
@@ -163,9 +166,22 @@ module GameLoopTest =
     let ``dealNewHands should replace existing hands`` () =
         let _match = createTestMatch ()
         let originalPlayerOneHand = _match.PlayerOne.Player.Hand
-        let updatedMatch = dealNewHands _match
+        let rng = Random(42)
+        let updatedMatch = dealNewHands rng _match
 
         updatedMatch.PlayerOne.Player.Hand |> should not' (equal originalPlayerOneHand)
+
+    [<Fact>]
+    let ``dealNewHands should be deterministic with same seed`` () =
+        let _match = createTestMatch ()
+        let rng1 = Random(42)
+        let match1 = dealNewHands rng1 _match
+
+        let rng2 = Random(42)
+        let match2 = dealNewHands rng2 _match
+
+        match1.PlayerOne.Player.Hand |> should equal match2.PlayerOne.Player.Hand
+        match1.PlayerTwo.Player.Hand |> should equal match2.PlayerTwo.Player.Hand
 
     [<Fact>]
     let ``checkMatchWinner should return None when no one reached target`` () =
@@ -237,7 +253,8 @@ module GameLoopTest =
     [<Fact>]
     let ``startNewRound should add new round to history`` () =
         let _match = createTestMatch ()
-        let updatedMatch = startNewRound _match
+        let rng = Random(42)
+        let updatedMatch = startNewRound rng _match
 
         updatedMatch.RoundHistory |> should haveLength 1
         updatedMatch.RoundHistory.Head.TurnHistory |> should haveLength 0
@@ -246,7 +263,8 @@ module GameLoopTest =
     let ``startNewRound should deal new hands to both players`` () =
         let _match = createTestMatch ()
         let originalPlayerOneHand = _match.PlayerOne.Player.Hand
-        let updatedMatch = startNewRound _match
+        let rng = Random(42)
+        let updatedMatch = startNewRound rng _match
 
         updatedMatch.PlayerOne.Player.Hand |> should not' (equal originalPlayerOneHand)
         updatedMatch.PlayerOne.Player.Hand |> should haveLength 3
@@ -260,7 +278,8 @@ module GameLoopTest =
             { _match with
                 RoundHistory = [ createRound ] }
 
-        let updatedMatch = startNewRound matchWithRounds
+        let rng = Random(42)
+        let updatedMatch = startNewRound rng matchWithRounds
 
         updatedMatch.RoundHistory |> should haveLength 2
 
@@ -273,7 +292,8 @@ module GameLoopTest =
                 PlayerOne = { _match.PlayerOne with Points = 5 }
                 PlayerTwo = { _match.PlayerTwo with Points = 3 } }
 
-        let updatedMatch = startNewRound matchWithPoints
+        let rng = Random(42)
+        let updatedMatch = startNewRound rng matchWithPoints
 
         updatedMatch.PlayerOne.Points |> should equal 5
         updatedMatch.PlayerTwo.Points |> should equal 3
@@ -350,3 +370,22 @@ module GameLoopTest =
 
         let firstPlayer = getFirstPlayer _match
         firstPlayer.Name |> should equal "Alice"
+
+    [<Fact>]
+    let ``determineRoundWinner should safely handle pattern matching on turns`` () =
+        // Test that we use safe pattern matching instead of .Head
+        let playerOne = createPlayer "Alice" []
+        let playerTwo = createPlayer "Bob" []
+
+        let turn1 = createTestTurn "Alice" "Bob" "Alice"
+        let turn2 = createTestTurn "Alice" "Bob" "Alice"
+
+        let round =
+            { createRound with
+                TurnHistory = [ turn2; turn1 ] }
+
+        let result = determineRoundWinner round
+
+        match result with
+        | Some(RoundWinner winner) -> winner.Name |> should equal "Alice"
+        | None -> failwith "Expected a winner"

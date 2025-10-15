@@ -1,5 +1,6 @@
 namespace Truco.Core
 
+open System
 open Xunit
 open FsUnit
 open Truco.Core.Actions
@@ -28,11 +29,31 @@ module ActionsTest =
         isBlackCard aceOfSwords |> should be False
 
     [<Fact>]
-    let ``Suffle a deck`` () =
-        let shuffledDeck = shuffleDeck ()
+    let ``Shuffle a deck should return 40 cards`` () =
+        let rng = Random(42)
+        let shuffledDeck = shuffleDeck rng
 
         shuffledDeck |> should haveLength 40
-        shuffledDeck |> should not' (equal cardValues.Keys)
+
+    [<Fact>]
+    let ``Shuffle a deck with same seed should be deterministic`` () =
+        let rng1 = Random(42)
+        let deck1 = shuffleDeck rng1
+
+        let rng2 = Random(42)
+        let deck2 = shuffleDeck rng2
+
+        deck1 |> should equal deck2
+
+    [<Fact>]
+    let ``Shuffle a deck with different seeds should produce different results`` () =
+        let rng1 = Random(42)
+        let deck1 = shuffleDeck rng1
+
+        let rng2 = Random(123)
+        let deck2 = shuffleDeck rng2
+
+        deck1 |> should not' (equal deck2)
 
     [<Fact>]
     let ``Check turn winner should return first player when he win`` () =
@@ -240,3 +261,32 @@ module ActionsTest =
 
         updatedMatch.PlayerOne.Player.Name |> should equal "John"
         updatedMatch.PlayerTwo.Player.Name |> should equal "Mary"
+
+    [<Fact>]
+    let ``addTurnToRoundHistory should handle empty RoundHistory safely`` () =
+        let playerOne = createPlayer "John" [ (Ace, Sword) ]
+        let playerTwo = createPlayer "Mary" [ (Ace, Gold) ]
+        let _match = createMatch playerOne playerTwo
+
+        let turn =
+            createTurn
+                (createPlayerMove playerOne (Ace, Sword))
+                (createPlayerMove playerTwo (Ace, Gold))
+                (Some playerOne)
+
+        let updatedMatch = addTurnToRoundHistory _match turn
+
+        // Should return match unchanged when no rounds exist
+        updatedMatch.RoundHistory |> should be Empty
+
+    [<Fact>]
+    let ``isBlackCard should use semantic constants`` () =
+        // High value cards (14, 13, 12, 11) should NOT be black
+        isBlackCard (Ace, Sword) |> should be False // value 14
+        isBlackCard (Ace, Club) |> should be False // value 13
+        isBlackCard (Seven, Sword) |> should be False // value 12
+        isBlackCard (Seven, Gold) |> should be False // value 11
+
+        // Lower value cards should be black
+        isBlackCard (Three, Sword) |> should be True // value 10
+        isBlackCard (Four, Cup) |> should be True // value 1

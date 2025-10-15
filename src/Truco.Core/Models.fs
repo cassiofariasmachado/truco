@@ -26,8 +26,6 @@ module Models =
 
     type Hand = Card list
 
-    let createHand (cards: Card list) : Hand = cards
-
     type Player = { Name: string; Hand: Hand }
 
     let createPlayer name hand = { Name = name; Hand = hand }
@@ -76,55 +74,61 @@ module Models =
           RoundHistory = []
           Winner = None }
 
+    // Semantic constants for special card values
+    let highestCardValue = 14
+    let secondHighestCardValue = 13
+    let thirdHighestCardValue = 12
+    let fourthHighestCardValue = 11
+
     let cardValues =
-        dict
-            [ (Ace, Sword), 14
-              (Ace, Club), 13
-              (Seven, Sword), 12
-              (Seven, Gold), 11
+        [ (Ace, Sword), 14
+          (Ace, Club), 13
+          (Seven, Sword), 12
+          (Seven, Gold), 11
 
-              (Three, Sword), 10
-              (Three, Club), 10
-              (Three, Gold), 10
-              (Three, Cup), 10
+          (Three, Sword), 10
+          (Three, Club), 10
+          (Three, Gold), 10
+          (Three, Cup), 10
 
-              (Two, Sword), 9
-              (Two, Club), 9
-              (Two, Gold), 9
-              (Two, Cup), 9
+          (Two, Sword), 9
+          (Two, Club), 9
+          (Two, Gold), 9
+          (Two, Cup), 9
 
-              (Ace, Gold), 8
-              (Ace, Cup), 8
+          (Ace, Gold), 8
+          (Ace, Cup), 8
 
-              (Twelve, Sword), 7
-              (Twelve, Club), 7
-              (Twelve, Gold), 7
-              (Twelve, Cup), 7
+          (Twelve, Sword), 7
+          (Twelve, Club), 7
+          (Twelve, Gold), 7
+          (Twelve, Cup), 7
 
-              (Eleven, Sword), 6
-              (Eleven, Club), 6
-              (Eleven, Gold), 6
-              (Eleven, Cup), 6
+          (Eleven, Sword), 6
+          (Eleven, Club), 6
+          (Eleven, Gold), 6
+          (Eleven, Cup), 6
 
-              (Ten, Sword), 5
-              (Ten, Club), 5
-              (Ten, Gold), 5
-              (Ten, Cup), 5
+          (Ten, Sword), 5
+          (Ten, Club), 5
+          (Ten, Gold), 5
+          (Ten, Cup), 5
 
-              (Seven, Club), 4
-              (Seven, Cup), 4
+          (Seven, Club), 4
+          (Seven, Cup), 4
 
-              (Six, Sword), 3
-              (Six, Club), 3
-              (Six, Gold), 3
-              (Six, Cup), 3
+          (Six, Sword), 3
+          (Six, Club), 3
+          (Six, Gold), 3
+          (Six, Cup), 3
 
-              (Five, Sword), 2
-              (Five, Club), 2
-              (Five, Gold), 2
-              (Five, Cup), 2
+          (Five, Sword), 2
+          (Five, Club), 2
+          (Five, Gold), 2
+          (Five, Cup), 2
 
-              (Four, Sword), 1
-              (Four, Club), 1
-              (Four, Gold), 1
-              (Four, Cup), 1 ]
+          (Four, Sword), 1
+          (Four, Club), 1
+          (Four, Gold), 1
+          (Four, Cup), 1 ]
+        |> Map.ofList
